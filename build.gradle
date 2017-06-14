@@ -22,7 +22,7 @@ task buildZip(type: Zip) {
 		from './ballerina-0.88/'
     }
     into ("./") {
-        from './hello.bal'
+        from './src/main/ballerina/hello.bal'
     }
 }
 
