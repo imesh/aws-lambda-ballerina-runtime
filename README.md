@@ -32,4 +32,9 @@ function for supporting Ballerina functions on AWS Lambda.
    gradle build
    ```
 
-6. Upload build/distributions/aws-lambda-ballerina-runtime.zip file to AWS Lambda and test.
+6. Upload build/distributions/aws-lambda-ballerina-runtime.zip file to AWS Lambda.
+
+7. Set handler name as follows and test:
+   ```
+   org.ballerina.lambda.sample.BallerinaFunctionInvoker::handleRequest
+   ```
