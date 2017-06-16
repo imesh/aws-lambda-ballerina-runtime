@@ -1,10 +1,10 @@
 # AWS Lambda Ballerina Runtime
 
-Currently AWS Lambda only supports Node.js, Python, Java and C#. For enabling any other runtime on AWS Lambda 
-requires a wrapper function implemented in one of the above languages. This project provides a Java wrapper 
+Currently, AWS Lambda only supports Node.js, Python, Java and C#. For enabling any other runtime on AWS Lambda 
+a wrapper function is required to be implemented in one of the above languages. This project provides a Java wrapper 
 function for supporting Ballerina functions on AWS Lambda.
 
-## How to run
+## How to Run
 
 1. Clone this project:
    ```
@@ -38,3 +38,8 @@ function for supporting Ballerina functions on AWS Lambda.
    ```
    org.ballerina.lambda.sample.BallerinaFunctionInvoker::handleRequest
    ```
+## References
+- [Scripting Languages for AWS Lambda: Running PHP, Ruby, and Go](https://aws.amazon.com/blogs/compute/scripting-languages-for-aws-lambda-running-php-ruby-and-go/)
+   
+## License
+Apache 2.0
