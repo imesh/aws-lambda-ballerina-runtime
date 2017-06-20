@@ -1,4 +1,4 @@
-package org.ballerina.lambda.sample;
+package org.ballerina.lambda.runtime;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,10 +10,22 @@ import java.util.Map;
  * Command executor utility class.
  */
 public class CommandExecutor {
+
+    /***
+     * Executes a shell command using the process builder.
+     * @param command The command to be executed with arguments.
+     * @return Returns the result of the process execution captured via STDOUT or STDERR.
+     */
     public static String executeCommand(String... command) {
         return executeCommand(null, command);
     }
 
+    /***
+     * Executes a shell command using the process builder.
+     * @param env Environment variables to be injected.
+     * @param command The command to be executed with arguments.
+     * @return Returns the result of the process execution captured via STDOUT or STDERR.
+     */
     public static String executeCommand(Map<String, String> env, String... command) {
         try {
             long startTime = System.currentTimeMillis();
@@ -72,5 +84,4 @@ public class CommandExecutor {
     private static boolean isNotNullOrEmpty(String value) {
         return (value != null) && (value.trim().length() > 0);
     }
-
 }
