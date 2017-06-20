@@ -13,13 +13,17 @@ dependencies {
 
 task buildZip(type: Zip) {
     from compileJava
-    from processResources              
+    from processResources
+
     into('lib') {
         from configurations.runtime
     }
-     
-    into("./ballerina/") {
+    into('./ballerina/') {
 		from './ballerina/'
+    }
+    into('./') {
+        from './'
+        include '*.bal'
     }
 }
 

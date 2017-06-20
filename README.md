@@ -7,39 +7,54 @@ function for supporting Ballerina functions on AWS Lambda.
 ## How to Run
 
 1. Clone this project:
-   ```
-   git clone https://github.com/imesh/aws-lambda-ballerina-runtime
-   ```
-
-2. Download Ballerina runtime distribution from [ballerinalang.org](http://ballerinalang.org/):
-   ```
-   cd aws-lambda-ballerina-runtime
-   wget http://ballerinalang.org/downloads/ballerina-runtime/ballerina-0.88.zip
+   
+   ```bash
+   $ git clone https://github.com/imesh/aws-lambda-ballerina-runtime
    ```
 
-3. Extract Ballerina runtime distribution in the project root folder:
-   ```
-   unzip ballerina-0.88.zip
+2. Download and extract Ballerina runtime distribution:
+   
+   ```bash
+   $ cd aws-lambda-ballerina-runtime
+   $ wget http://ballerinalang.org/downloads/ballerina-runtime/ballerina-<version>.zip
+   $ unzip ballerina-<version>.zip
    ```
 
-4. Delete the Ballerina samples folder:
+3. Remove version from the Ballerina folder name and delete the samples folder:
+   
+   ```bash
+   $ mv ballerina-<version>/ ballerina/
+   $ rm -rf ballerina/samples/
    ```
-   rm -rf ballerina-0.88/samples/
+
+4. Copy the Ballerina main function file to the project root folder:
+   
+   ```bash
+   $ cp /path/of/bal/file/ /path/to/aws-lambda-ballerina-runtime/
+   ```
+   
+   For an example if the Ballerina file name is "function.bal", the project folder may look as follows:
+   
+   ```bash
+   $ ls
+   README.md     ballerina/    build/        build.gradle  function.bal     src/
    ```
 
 5. Build project using Gradle:
-   ```
+   
+   ```bash
    gradle build
    ```
 
 6. Upload build/distributions/aws-lambda-ballerina-runtime.zip file to AWS Lambda.
 
 7. Set the handler name as follows and execute a test:
+   
    ```
    org.ballerina.lambda.runtime.BallerinaFunctionInvoker::handleRequest
    ```
    
-   ```
+   ```bash
    START RequestId: 4f655bb9-52cf-11e7-b297-0b19a4fd7956 Version: $LATEST
    Request received: {key3=value3, key2=value2, key1=value1}
    Executing command: cp -r ballerina /tmp/ballerina

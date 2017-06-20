@@ -13,6 +13,7 @@ hs_err_pid*
 
 .gradle/
 *.iml
+*.bal
 .idea/
 build/
 target/
