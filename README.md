@@ -55,17 +55,18 @@ function for supporting Ballerina functions on AWS Lambda.
    ```
    
    ```bash
-   START RequestId: 4f655bb9-52cf-11e7-b297-0b19a4fd7956 Version: $LATEST
-   Request received: {key3=value3, key2=value2, key1=value1}
+   START RequestId: 674afc88-5641-11e7-b821-a148953e4faa Version: $LATEST
+   Request received: {body={hello=ballerina}}
    Executing command: cp -r ballerina /tmp/ballerina
-   Command executed in 25 ms.
-   Executing command: cp function.bal /tmp/function.bal
-   Command executed in 1 ms.
-   Executing command: /tmp/ballerina/bin/ballerina run main /tmp/function.bal {key3=value3, key2=value2, key1=value1}
-   Output: {key3=value3, key2=value2, key1=value1}
-   Command executed in 1898 ms.
-   END RequestId: 4f655bb9-52cf-11e7-b297-0b19a4fd7956
-   REPORT RequestId: 4f655bb9-52cf-11e7-b297-0b19a4fd7956	Duration: 1940.79 ms	Billed Duration: 2000 ms	Memory Size: 1536 MB	Max Memory Used: 138 MB	
+   Command executed in 27 ms, exit code: 0
+   Executing command: cp echo.bal /tmp/echo.bal
+   Command executed in 1 ms, exit code: 0
+   Message body: {"hello":"ballerina"}
+   Executing command: /tmp/ballerina/bin/ballerina run main /tmp/echo.bal {"hello":"ballerina"}
+   Output: {"hello":"ballerina"}
+   Command executed in 2226 ms, exit code: 0
+   END RequestId: 674afc88-5641-11e7-b821-a148953e4faa
+   REPORT RequestId: 674afc88-5641-11e7-b821-a148953e4faa	Duration: 2281.62 ms	Billed Duration: 2300 ms 	Memory Size: 1536 MB	Max Memory Used: 196 MB
    ```
    
 ## References
