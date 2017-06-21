@@ -21,22 +21,31 @@ package org.ballerina.aws.lambda.runtime;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * AWS API Gateway Ballerina function invoker.
  */
-public class ApiGatewayFunctionInvoker {
+public class ApiGatewayFunctionInvoker implements RequestStreamHandler {
 
     private static final String BAL_FILE_NAME_ENV_VAR = "BAL_FILE_NAME";
     private static final String JAVA_HOME_ENV_VAR = "JAVA_HOME";
     private static final String JAVA_HOME_SYS_PROPERTY = "java.home";
     private static final String MESSAGE_BODY = "body";
-    private static final Gson gson = new GsonBuilder().create();
 
+    private final JSONParser parser = new JSONParser();
     private final String balFileName;
 
     /***
@@ -51,38 +60,49 @@ public class ApiGatewayFunctionInvoker {
     }
 
     /***
-     * Handle AWS API Gateway request
-     * @param input Incoming request message
-     * @param context Lambda context
-     * @return API Gateway response
+     * Handle API Gateway request.
+     * @param inputStream request message stream.
+     * @param outputStream response message stream.
+     * @param context Lambda context.
+     * @throws IOException
      */
-    public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
+    public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
+        LambdaLogger logger = context.getLogger();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        JSONObject responseJson = new JSONObject();
+
         try {
-            LambdaLogger logger = context.getLogger();
-            logger.log("Request received: " + input + System.lineSeparator());
+            // Read request message
+            JSONObject requestJson = (JSONObject) parser.parse(reader);
+            logger.log("Request received: " + requestJson.toJSONString() + System.lineSeparator());
 
             // Copy ballerina runtime and function file to /tmp directory
             CommandExecutor.executeCommand(logger, "cp", "-r", "ballerina", "/tmp/ballerina");
             CommandExecutor.executeCommand(logger, "cp", balFileName, "/tmp/" + balFileName);
 
-            // Read message body from the input
-            String body = "";
-            if (input != null) {
-                if (input.containsKey(MESSAGE_BODY)) {
-                    body = gson.toJson(input.get(MESSAGE_BODY));
-                }
-                logger.log("Message body: " + body + System.lineSeparator());
-            }
-
             // Execute ballerina function and return the response
             Map<String, String> env = new HashMap<String, String>();
             env.put(JAVA_HOME_ENV_VAR, System.getProperty(JAVA_HOME_SYS_PROPERTY));
+            String body = requestJson.get(MESSAGE_BODY).toString();
             CommandResult result = CommandExecutor.executeCommand(logger, env, "/tmp/ballerina/bin/ballerina",
                     "run", "main", "/tmp/" + balFileName, body);
+
+            // Prepare response message
             int statusCode = (result.getExitCode() == 0) ? 200 : 500;
-            return new ApiGatewayResponse(statusCode, result.getOutput());
-        } catch (Exception e) {
-            return new ApiGatewayResponse(500, e.getMessage());
+            JSONObject headerJson = new JSONObject();
+            JSONObject responseBody = (JSONObject) parser.parse(result.getOutput());
+
+            responseJson.put("statusCode", statusCode);
+            responseJson.put("headers", headerJson);
+            responseJson.put("body", responseBody.toString());
+        } catch (ParseException e) {
+            responseJson.put("statusCode", "400");
+            responseJson.put("exception", e);
         }
+
+        logger.log(responseJson.toJSONString());
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
+        writer.write(responseJson.toJSONString());
+        writer.close();
     }
 }
