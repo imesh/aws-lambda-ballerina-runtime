@@ -51,7 +51,7 @@ function for supporting Ballerina functions on AWS Lambda.
 7. Set the handler name as follows and execute a test:
    
    ```
-   org.ballerina.lambda.runtime.BallerinaFunctionInvoker::handleRequest
+   org.ballerina.aws.lambda.runtime.ApiGatewayFunctionInvoker::handleRequest
    ```
    
    ```bash
