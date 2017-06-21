@@ -22,6 +22,7 @@ package org.ballerina.aws.lambda.runtime;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -44,6 +45,10 @@ public class ApiGatewayFunctionInvoker implements RequestStreamHandler {
     private static final String JAVA_HOME_ENV_VAR = "JAVA_HOME";
     private static final String JAVA_HOME_SYS_PROPERTY = "java.home";
     private static final String MESSAGE_BODY = "body";
+    private static final String STATUS_CODE = "statusCode";
+    private static final String HEADERS = "headers";
+    private static final String EXCEPTION = "exception";
+    private static final String UTF_8 = "UTF-8";
 
     private final JSONParser parser = new JSONParser();
     private final String balFileName;
@@ -83,25 +88,33 @@ public class ApiGatewayFunctionInvoker implements RequestStreamHandler {
             // Execute ballerina function and return the response
             Map<String, String> env = new HashMap<String, String>();
             env.put(JAVA_HOME_ENV_VAR, System.getProperty(JAVA_HOME_SYS_PROPERTY));
-            String body = requestJson.get(MESSAGE_BODY).toString();
+            String body = (requestJson.get(MESSAGE_BODY) != null) ? requestJson.get(MESSAGE_BODY).toString() : "";
             CommandResult result = CommandExecutor.executeCommand(logger, env, "/tmp/ballerina/bin/ballerina",
                     "run", "main", "/tmp/" + balFileName, body);
 
             // Prepare response message
             int statusCode = (result.getExitCode() == 0) ? 200 : 500;
             JSONObject headerJson = new JSONObject();
-            JSONObject responseBody = (JSONObject) parser.parse(result.getOutput());
+            Object response = parser.parse(result.getOutput());
+            if (response instanceof JSONObject) {
+                JSONObject responseBody = (JSONObject) response;
+                responseJson.put(MESSAGE_BODY, responseBody.toString());
+            } else if (response instanceof JSONArray) {
+                JSONArray responseBody = (JSONArray) response;
+                responseJson.put(MESSAGE_BODY, responseBody.toString());
+            } else {
+                throw new RuntimeException("Unknown response message type");
+            }
 
-            responseJson.put("statusCode", statusCode);
-            responseJson.put("headers", headerJson);
-            responseJson.put("body", responseBody.toString());
+            responseJson.put(STATUS_CODE, statusCode);
+            responseJson.put(HEADERS, headerJson);
         } catch (ParseException e) {
-            responseJson.put("statusCode", "400");
-            responseJson.put("exception", e);
+            responseJson.put(STATUS_CODE, "400");
+            responseJson.put(EXCEPTION, e);
         }
 
         logger.log(responseJson.toJSONString());
-        OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream, UTF_8);
         writer.write(responseJson.toJSONString());
         writer.close();
     }
