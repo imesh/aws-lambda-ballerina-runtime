@@ -1,5 +1,7 @@
 # AWS Lambda Ballerina Runtime
 
+[Architecture](images/architecture.png)
+
 Currently, AWS Lambda only supports Node.js, Python, Java and C#. For enabling any other runtime on AWS Lambda 
 a wrapper function is required to be implemented in one of the above languages. This project provides a Java wrapper 
 function for supporting Ballerina functions on AWS Lambda.
